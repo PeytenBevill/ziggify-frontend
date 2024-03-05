@@ -8,6 +8,10 @@ import Reorder from "./Reorder";
 import VendorList from "./VendorList";
 
 const Dashboard: React.FC = () => {
+  
+
+  
+
   return (
     <div className=" h-screen p-5 bg-blue-50 overflow-y-hidden">
       <h2>Company Name</h2>
@@ -51,7 +55,7 @@ const Dashboard: React.FC = () => {
         </section>
         <section className="bg-white w-1/5 p-8 flex flex-col align-center rounded shadow-lg cursor-pointer text-center ml-4">
           <h2>Order Soon!</h2>
-          <Reorder />
+          {/* <Reorder /> */}
         </section>
         <section className="bg-white w-1/5 p-8 flex flex-col align-center rounded shadow-lg cursor-pointer text-center ml-4">
           <h2>List of Vendors</h2>

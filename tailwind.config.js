@@ -22,6 +22,7 @@ module.exports = {
         iconColorThree: '#fcb360',
         iconColorFour: '#8042FF',
         pieBorderOne: '#0073D5',
+        pieBorderThree: '#FEB10B',
         pieBorderFour: '#FF5D0E',
         dailySalesColor: '#F9B593'
       },
@@ -34,7 +35,10 @@ module.exports = {
       },
       width: {
         Thirty: '30%'
-      }
+      },
+      cursor: {
+        trashcan: 'url("/trash.svg"), auto',
+      },  
     },
   },
   plugins: [],

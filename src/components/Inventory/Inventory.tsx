@@ -1,12 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+type DataItem = {
+  _id: string;
+  name: string;
+  category: string;
+  upc: string;
+  cost: number;
+  price: number;
+  discount: number;
+  qty: number;
+  reorder: number;
+  roAmount: number;
+  sku: string;
+  vendor: string;
+  sellerId: string;
+  date: string;
+  status: string;
+  companyAccount: string;
+};
 
 export const Inventory: React.FC = () => {
   const [search, setSearch] = useState("");
+  const [inventory, setInventory] = useState<DataItem[]>([]);
   const [searchType, setSearchType] = useState<keyof DataItem | "">("");
   const [dataOrFiltered, setDataOrFiltered] = useState("data");
   const [filteredItems, setFilteredItems] = useState<DataItem[]>([]);
   const [edit, setEdit] = useState(false);
-  const [editForm, setEditForm] = useState(0);
+  const [add, setAdd] = useState(false);
+  const [deleteItem, setDeleteItem] = useState(false);
+  const [inputValues, setInputValues] = useState<string[]>([]);
+  const updated: DataItem[] = [];
   const labels = [
     "ID",
     "Name",
@@ -25,77 +48,38 @@ export const Inventory: React.FC = () => {
     "Status",
   ];
 
-  type DataItem = {
-    ID: number;
-    Name: string;
-    Category: string;
-    UPC: string;
-    Cost: number;
-    Price: number;
-    Discount: number;
-    Qty: number;
-    "Re-order": number;
-    "RO Amount": number;
-    SKU: string;
-    Vendor: string;
-    "Seller ID": string;
-    Date: string;
-    Status: string;
+  const labelToFieldMapping: { [key: string]: keyof DataItem } = {
+    ID: "_id",
+    Name: "name",
+    Category: "category",
+    UPC: "upc",
+    Cost: "cost",
+    Price: "price",
+    Discount: "discount",
+    Qty: "qty",
+    "Re-order": "reorder",
+    "RO Amount": "roAmount",
+    SKU: "sku",
+    Vendor: "vendor",
+    "Seller ID": "sellerId",
+    Date: "date",
+    Status: "status",
   };
 
-  const data: DataItem[] = [
-    {
-      ID: 1,
-      Name: "Product A",
-      Category: "Electronics",
-      UPC: "123456789101112131415161718",
-      Cost: 20.5,
-      Price: 29.99,
-      Discount: 0.1,
-      Qty: 50,
-      "Re-order": 20,
-      "RO Amount": 500,
-      SKU: "SKU123",
-      Vendor: "Vendor X",
-      "Seller ID": "S123",
-      Date: "2022-02-13",
-      Status: "In Stock",
-    },
-    {
-      ID: 2,
-      Name: "Product B",
-      Category: "Clothing",
-      UPC: "987654321",
-      Cost: 15.75,
-      Price: 24.99,
-      Discount: 0.15,
-      Qty: 30,
-      "Re-order": 15,
-      "RO Amount": 375,
-      SKU: "SKU456",
-      Vendor: "Vendor Y",
-      "Seller ID": "S456",
-      Date: "2022-02-13",
-      Status: "Discount",
-    },
-    {
-      ID: 3,
-      Name: "Product C",
-      Category: "Home & Garden",
-      UPC: "123555555",
-      Cost: 30.0,
-      Price: 49.99,
-      Discount: 0.2,
-      Qty: 25,
-      "Re-order": 25,
-      "RO Amount": 750,
-      SKU: "SKU789",
-      Vendor: "Vendor Z",
-      "Seller ID": "S789",
-      Date: "2022-02-13",
-      Status: "Re-Order",
-    },
-  ];
+  const companyAccount = "12345";
+
+  useEffect(() => {
+    const urlInventory = `https://ziggify-backend.onrender.com/inventory/${companyAccount}`;
+    fetch(urlInventory)
+      .then((res) => res.json())
+      .then((data) => {
+        setInventory(data);
+        // console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching vendors:", error);
+      });
+  }, [companyAccount]);
 
   const handleSearch = () => {
     if (!searchType) {
@@ -103,8 +87,14 @@ export const Inventory: React.FC = () => {
       return;
     }
 
-    const tempFilteredItems = data.filter((item) => {
-      const value = item[searchType as keyof DataItem];
+    const tempFilteredItems = inventory.filter((item) => {
+      const field = labelToFieldMapping[searchType];
+      if (!field) {
+        window.alert("Invalid filter selected");
+        return false;
+      }
+
+      const value = item[field];
 
       if (typeof value === "string" && typeof search === "string") {
         // If both value and search are strings, perform case-insensitive comparison
@@ -114,12 +104,10 @@ export const Inventory: React.FC = () => {
         let strValue = value.toString();
         return strValue.includes(search);
       }
-
-      // If types don't match or are invalid, return false
-      return window.alert("An error occurred or nothing was found");
+      window.alert("An error occurred or nothing was found");
+      return false;
     });
 
-    // Set the filtered items
     setFilteredItems(tempFilteredItems);
     setDataOrFiltered("filtered");
   };
@@ -128,14 +116,157 @@ export const Inventory: React.FC = () => {
     setEdit(true);
   };
 
-  const handleSave = () => {
+  const collectEditedInventory = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string,
+    label: string
+  ) => {
+    let value: string | number = e.target.value;
+    if (
+      label === "cost" ||
+      label === "price" ||
+      label === "discount" ||
+      label === "qty" ||
+      label === "reorder" ||
+      label === "roAmount"
+    ) {
+      value = Number(value);
+    }
+    let obj = inventory.find((item) => item._id === id);
+
+    const index = updated.findIndex((item) => item === obj);
+
+    if (index !== -1) {
+      if ((updated[index] as any)[label] === value) {
+      } else {
+        (updated[index] as any)[label] = value;
+      }
+    } else {
+      if (obj) {
+        (obj as any)[label] = value;
+        updated.push(obj);
+      }
+    }
+    console.log(updated);
+  };
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch(
+        "https://ziggify-backend.onrender.com/inventory/",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updated),
+        }
+      );
+
+      if (response.ok) {
+        console.log("Items updated successfully");
+      } else {
+        console.error("Failed to update items");
+      }
+    } catch (error) {
+      console.error("Error updating items:", error);
+    }
     window.alert("Your changes have been saved");
     setEdit(false);
-    setEditForm(0);
   };
 
   const addOneRow = () => {
-    setEditForm((currCount) => currCount + 1);
+    setAdd(true);
+  };
+
+  const handleInputChange = (index: number, value: string) => {
+    const updatedValues = [...inputValues];
+    updatedValues[index] = value;
+    setInputValues(updatedValues);
+  };
+
+  const handleAdd = async () => {
+    const dataToSend = {
+      name: inputValues[1],
+      category: inputValues[2],
+      upc: inputValues[3],
+      cost: inputValues[4],
+      price: inputValues[5],
+      discount: inputValues[6],
+      qty: inputValues[7],
+      reorder: inputValues[8],
+      roAmount: inputValues[9],
+      sku: inputValues[10],
+      vendor: inputValues[11],
+      sellerId: inputValues[12],
+      date: new Date(),
+      status: inputValues[14],
+      companyAccount: companyAccount,
+    };
+    try {
+      const response = await fetch(
+        "https://ziggify-backend.onrender.com/inventory/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataToSend),
+        }
+      );
+
+      if (response.ok) {
+        console.log("Items updated successfully");
+        window.location.reload();
+      } else {
+        console.error("Failed to update items");
+      }
+    } catch (err) {
+      console.error("problem:", err);
+    }
+    window.alert("Your changes have been saved");
+    setAdd(false);
+  };
+
+  const handleDelete = async (clickedItem: DataItem) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${clickedItem.name}?`
+    );
+
+    if (confirmDelete) {
+      let id = clickedItem._id;
+      try {
+        const response = await fetch(
+          `https://ziggify-backend.onrender.com/inventory/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(clickedItem),
+          }
+        );
+
+        if (response.ok) {
+          console.log("Item deleted");
+          const urlInventory = `https://ziggify-backend.onrender.com/inventory/${companyAccount}`;
+          fetch(urlInventory)
+            .then((res) => res.json())
+            .then((data) => {
+              setInventory(data);
+              // console.log(data);
+            })
+            .catch((error) => {
+              console.error("Error fetching vendors:", error);
+            });
+          // window.location.reload();
+        } else {
+          console.error("Failed to delete");
+        }
+      } catch (err) {
+        console.error("problem:", err);
+      }
+    }
   };
 
   // const handleFileUpload = (e) => {
@@ -206,20 +337,45 @@ export const Inventory: React.FC = () => {
         >
           Reset
         </button>
-        <div className="flex flex-row ml-96">
+        <div className="flex flex-row ml-32">
+          <button
+            className="mr-10 p-2 bg-pieChartOne text-white rounded-lg border-2 border-pieBorderOne pl-4 pr-4 w-24 hover:border-pieBorderThree hover:bg-pieChartThree"
+            onClick={addOneRow}
+          >
+            Add +
+          </button>
           <button
             className={
               edit
-                ? "mr-10 p-2 bg-pieChartFour text-white rounded-lg border-2 border-pieBorderFour pl-4 pr-4"
-                : "mr-10 p-2 bg-pieChartOne text-white rounded-lg border-2 border-pieBorderOne pl-4 pr-4"
+                ? "mr-10 p-2 bg-pieChartFour text-white rounded-lg border-2 border-pieBorderFour pl-4 pr-4 w-24"
+                : "mr-10 p-2 bg-pieChartOne text-white rounded-lg border-2 border-pieBorderOne pl-4 pr-4 w-24"
             }
             onClick={handleEdit}
           >
             Edit +
           </button>
           <button
-            className="p-2 pl-4 pr-4 bg-pieChartOne text-white rounded-lg border-2 border-pieBorderOne"
-            onClick={handleSave}
+            className={
+              deleteItem
+                ? "mr-10 p-2 bg-red-500 text-white rounded-lg border-2 border-red-600 pl-4 pr-4 w-24"
+                : "mr-10 p-2 bg-pieChartOne text-white rounded-lg border-2 border-pieBorderOne pl-4 pr-4 w-24"
+            }
+            onClick={() => setDeleteItem(true)}
+          >
+            Delete -
+          </button>
+          <button
+            className="p-2 pl-4 pr-4 bg-pieChartOne text-white rounded-lg border-2 border-pieBorderOne w-24"
+            onClick={
+              edit
+                ? handleSave
+                : deleteItem
+                ? () => {
+                    setDeleteItem(false);
+                    window.alert("Your changes have been saved");
+                  }
+                : handleAdd
+            }
           >
             Save
           </button>
@@ -232,28 +388,31 @@ export const Inventory: React.FC = () => {
           </p>
         ))}
         {dataOrFiltered === "data" && edit === false
-          ? data.map((item) => (
+          ? inventory.map((item) => (
               <>
                 {labels.map((label, i) => (
                   <p
                     key={i}
                     className={
                       label === "Status"
-                        ? item[label as keyof DataItem] === "In Stock"
+                        ? item[labelToFieldMapping[label]] === "In Stock"
                           ? "text-center border-2 p-1 text-pieChartTwo"
-                          : item[label as keyof DataItem] === "Re-Order"
+                          : item[labelToFieldMapping[label]] === "Re-Order"
                           ? "text-center border-2 p-1 text-red-500"
-                          : item[label as keyof DataItem] === "Discount"
+                          : item[labelToFieldMapping[label]] === "Discount"
                           ? "text-center border-2 p-1 text-iconColorFour"
-                          : item[label as keyof DataItem] === "Out of Stock"
+                          : item[labelToFieldMapping[label]] === "Out of Stock"
                           ? "text-center border-2 p-1 text-gray-500"
-                          : item[label as keyof DataItem] === "Incomplete"
+                          : item[labelToFieldMapping[label]] === "Incomplete"
                           ? "text-center border-2 p-1 text-pieChartThree"
                           : ""
-                        : "text-center border-2 p-1 overflow-hidden overflow-x-scroll"
+                        : !deleteItem
+                        ? "text-center border-2 p-1 overflow-hidden overflow-x-scroll"
+                        : "text-center border-2 p-1 overflow-hidden overflow-x-scroll cursor-trashcan"
                     }
+                    onClick={deleteItem ? () => handleDelete(item) : undefined}
                   >
-                    {item[label as keyof DataItem]}
+                    {item[labelToFieldMapping[label]]}
                   </p>
                 ))}
               </>
@@ -266,34 +425,44 @@ export const Inventory: React.FC = () => {
                     key={i}
                     className={
                       label === "Status"
-                        ? item[label as keyof DataItem] === "In Stock"
+                        ? item[labelToFieldMapping[label]] === "In Stock"
                           ? "text-center border-2 p-1 text-pieChartTwo"
-                          : item[label as keyof DataItem] === "Re-Order"
+                          : item[labelToFieldMapping[label]] === "Re-Order"
                           ? "text-center border-2 p-1 text-red-500"
-                          : item[label as keyof DataItem] === "Discount"
+                          : item[labelToFieldMapping[label]] === "Discount"
                           ? "text-center border-2 p-1 text-iconColorFour"
-                          : item[label as keyof DataItem] === "Out of Stock"
+                          : item[labelToFieldMapping[label]] === "Out of Stock"
                           ? "text-center border-2 p-1 text-gray-500"
-                          : item[label as keyof DataItem] === "Incomplete"
+                          : item[labelToFieldMapping[label]] === "Incomplete"
                           ? "text-center border-2 p-1 text-pieChartThree"
                           : ""
-                        : "text-center border-2 p-1 overflow-hidden overflow-x-scroll"
+                        : !deleteItem
+                        ? "text-center border-2 p-1 overflow-hidden overflow-x-scroll"
+                        : "text-center border-2 p-1 overflow-hidden overflow-x-scroll cursor-trashcan"
                     }
+                    onClick={deleteItem ? () => handleDelete(item) : undefined}
                   >
-                    {item[label as keyof DataItem]}
+                    {item[labelToFieldMapping[label]]}
                   </p>
                 ))}
               </>
             ))
           : dataOrFiltered === "data" && edit
-          ? data.map((item) => (
+          ? inventory.map((item) => (
               <>
                 {labels.map((label, i) => (
                   <input
                     type="text"
                     key={i}
-                    value={`${item[label as keyof DataItem]}`}
+                    placeholder={`${item[labelToFieldMapping[label]]}`}
                     className="text-center border-2 p-1 overflow-hidden overflow-x-scroll border-gray-600"
+                    onChange={(e) =>
+                      collectEditedInventory(
+                        e,
+                        item._id,
+                        labelToFieldMapping[label]
+                      )
+                    }
                   />
                 ))}
               </>
@@ -304,24 +473,33 @@ export const Inventory: React.FC = () => {
                   <input
                     type="text"
                     key={i}
-                    value={`${item[label as keyof DataItem]}`}
+                    value={`${item[labelToFieldMapping[label]]}`}
                     className="text-center border-2 p-1 overflow-hidden overflow-x-scroll border-gray-600"
                   />
                 ))}
               </>
             ))}
-        {editForm > 0 && (
+        {add && (
           <>
-            {Array.from({ length: editForm }).map((_) => (
+            {labels.map((label, i) => (
               <>
-                {labels.map((label, i) => (
+                {label === "ID" || label === "Date" ? (
+                  <input
+                    type="text"
+                    key={i}
+                    placeholder={label}
+                    disabled
+                    className="text-center border-2 p-1 overflow-hidden overflow-x-scroll border-gray-600"
+                  />
+                ) : (
                   <input
                     type="text"
                     key={i}
                     placeholder={label}
                     className="text-center border-2 p-1 overflow-hidden overflow-x-scroll border-gray-600"
+                    onChange={(e) => handleInputChange(i, e.target.value)}
                   />
-                ))}
+                )}
               </>
             ))}
           </>
