@@ -55,7 +55,7 @@ const Dashboard: React.FC = () => {
         </section>
         <section className="bg-white w-1/5 p-8 flex flex-col align-center rounded shadow-lg cursor-pointer text-center ml-4">
           <h2>Order Soon!</h2>
-          {/* <Reorder /> */}
+          <Reorder />
         </section>
         <section className="bg-white w-1/5 p-8 flex flex-col align-center rounded shadow-lg cursor-pointer text-center ml-4">
           <h2>List of Vendors</h2>

@@ -12,7 +12,7 @@ const VendorList: React.FC = () => {
       .then((res) => res.json())
       .then((data) => {
         setVendors(data);
-        console.log(data); // Move the console.log inside useEffect
+        console.log(data);
       })
       .catch((error) => {
         console.error("Error fetching vendors:", error);

@@ -77,7 +77,7 @@ export const Inventory: React.FC = () => {
         // console.log(data);
       })
       .catch((error) => {
-        console.error("Error fetching vendors:", error);
+        console.error("Error fetching inventory:", error);
       });
   }, [companyAccount]);
 
@@ -352,7 +352,7 @@ export const Inventory: React.FC = () => {
             }
             onClick={handleEdit}
           >
-            Edit +
+            Edit ~
           </button>
           <button
             className={
@@ -469,12 +469,19 @@ export const Inventory: React.FC = () => {
             ))
           : filteredItems.map((item) => (
               <>
-                {labels.map((label, i) => (
+               {labels.map((label, i) => (
                   <input
                     type="text"
                     key={i}
-                    value={`${item[labelToFieldMapping[label]]}`}
+                    placeholder={`${item[labelToFieldMapping[label]]}`}
                     className="text-center border-2 p-1 overflow-hidden overflow-x-scroll border-gray-600"
+                    onChange={(e) =>
+                      collectEditedInventory(
+                        e,
+                        item._id,
+                        labelToFieldMapping[label]
+                      )
+                    }
                   />
                 ))}
               </>
@@ -505,14 +512,6 @@ export const Inventory: React.FC = () => {
           </>
         )}
       </div>
-      {edit && (
-        <button
-          className="bg-pieChartOne text-white rounded-full h-16 w-16 text-2xl mt-4 border-2 border-transparent hover:bg-blue-400 hover:border-blue-600 text-center"
-          onClick={addOneRow}
-        >
-          +
-        </button>
-      )}
     </div>
   );
 };
