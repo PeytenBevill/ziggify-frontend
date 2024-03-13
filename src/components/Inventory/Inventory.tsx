@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../Login/AuthProvider";
+import { useNavigate } from "react-router";
 
 type DataItem = {
   _id: string;
@@ -30,6 +32,11 @@ export const Inventory: React.FC = () => {
   const [deleteItem, setDeleteItem] = useState(false);
   const [inputValues, setInputValues] = useState<string[]>([]);
   const updated: DataItem[] = [];
+  const navigate = useNavigate()
+  const {login, companyInfo} = useAuth()
+
+
+  const companyAccount = companyInfo.companyAccount
   const labels = [
     "ID",
     "Name",
@@ -66,9 +73,10 @@ export const Inventory: React.FC = () => {
     Status: "status",
   };
 
-  const companyAccount = "12345";
-
   useEffect(() => {
+    if(!login) {
+      navigate('/')
+    }
     const urlInventory = `https://ziggify-backend.onrender.com/inventory/${companyAccount}`;
     fetch(urlInventory)
       .then((res) => res.json())

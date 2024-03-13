@@ -1,4 +1,5 @@
-import React from "react";
+import {useEffect} from "react";
+import { useNavigate } from "react-router";
 import SwitchSeriesType from "./LineChart";
 // import Totals from "./Totals";
 import PieChartExample from "./PieChart";
@@ -6,18 +7,41 @@ import FinanceInfo from "./FinanceInfo";
 import Purchase from "./Purchase";
 import Reorder from "./Reorder";
 import VendorList from "./VendorList";
+import { useAuth } from "../Login/AuthProvider";
 
 const Dashboard: React.FC = () => {
-  
+  const { login, companyInfo } = useAuth();
+  const navigate = useNavigate();
 
-  
+  const companyName = companyInfo.companyName
 
+  useEffect(() => {
+    if (!login) {
+      navigate('/');
+    }
+  },[])
+
+
+  const handleReports = () => {
+    navigate("/reports");
+  };
+
+  const handleInventory = () => {
+    navigate("/inventory");
+  };
+
+  const handleVendors = () => {
+    navigate("/vendors");
+  };
   return (
     <div className=" h-screen p-5 bg-blue-50 overflow-y-hidden">
-      <h2>Company Name</h2>
+      <h2>{companyName}</h2>
       <section className="flex flex-row justify-center mt-6 h-2/4 w-full">
         <SwitchSeriesType />
-        <section className="w-2/6 bg-white rounded shadow-lg cursor-pointer">
+        <section
+          className="w-2/6 bg-white rounded shadow-lg cursor-pointer"
+          onClick={handleReports}
+        >
           <p className="m-4 text-center mb-0">Highest Selling Product</p>
           <div className="flex flex-row justify-center h-full w-full">
             <div className="mt-10 flex flex-col justify-evenly w-28 p-2">
@@ -45,19 +69,31 @@ const Dashboard: React.FC = () => {
         </section>
       </section>
       <section className="flex flex-row mt-6">
-        <section className="bg-white w-Thirty p-8 flex flex-col justify-center align-center rounded shadow-lg cursor-pointer">
+        <section
+          className="bg-white w-Thirty p-8 flex flex-col justify-center align-center rounded shadow-lg cursor-pointer"
+          onClick={handleReports}
+        >
           <h2 className="mb-2">Sales Overview</h2>
           <FinanceInfo />
         </section>
-        <section className="bg-white w-Thirty p-8 flex flex-col justify-center align-center rounded shadow-lg ml-4 cursor-pointer">
+        <section
+          className="bg-white w-Thirty p-8 flex flex-col justify-center align-center rounded shadow-lg ml-4 cursor-pointer"
+          onClick={handleReports}
+        >
           <h2 className="mb-2">Purchase Overview</h2>
           <Purchase />
         </section>
-        <section className="bg-white w-1/5 p-8 flex flex-col align-center rounded shadow-lg cursor-pointer text-center ml-4">
+        <section
+          className="bg-white w-1/5 p-8 flex flex-col align-center rounded shadow-lg cursor-pointer text-center ml-4"
+          onClick={handleInventory}
+        >
           <h2>Order Soon!</h2>
           <Reorder />
         </section>
-        <section className="bg-white w-1/5 p-8 flex flex-col align-center rounded shadow-lg cursor-pointer text-center ml-4">
+        <section
+          className="bg-white w-1/5 p-8 flex flex-col align-center rounded shadow-lg cursor-pointer text-center ml-4"
+          onClick={handleVendors}
+        >
           <h2>List of Vendors</h2>
           <VendorList />
         </section>

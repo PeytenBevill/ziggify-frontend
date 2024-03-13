@@ -7,7 +7,7 @@ import HorizontalBars from "./BarGraph";
 const Reports: React.FC = () => {
   return (
     <div className="bg-blue-50 h-screen p-2">
-      <section className="flex flex-row justify-center mt-6 h-2/4 w-full">
+      <section className="flex flex-row justify-center mt-2 h-2/4 w-full">
         <SwitchSeriesType />
         <section className="w-2/6 bg-white rounded shadow-lg">
           <p className="m-4 text-center mb-0 text-xl">Highest Selling Product</p>
