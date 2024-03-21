@@ -225,7 +225,16 @@ export const Inventory: React.FC = () => {
 
       if (response.ok) {
         console.log("Items updated successfully");
-        window.location.reload();
+        const urlInventory = `https://ziggify-backend.onrender.com/inventory/${companyAccount}`;
+        fetch(urlInventory)
+          .then((res) => res.json())
+          .then((data) => {
+            setInventory(data);
+            // console.log(data);
+          })
+          .catch((error) => {
+            console.error("Error fetching inventory:", error);
+          })
       } else {
         console.error("Failed to update items");
       }
@@ -238,7 +247,7 @@ export const Inventory: React.FC = () => {
 
   const handleDelete = async (clickedItem: DataItem) => {
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${clickedItem.name}?`
+      `Are you sure you want to delete ${clickedItem._id}?`
     );
 
     if (confirmDelete) {
@@ -265,7 +274,7 @@ export const Inventory: React.FC = () => {
               // console.log(data);
             })
             .catch((error) => {
-              console.error("Error fetching vendors:", error);
+              console.error("Error fetching inventory:", error);
             });
           // window.location.reload();
         } else {
@@ -274,6 +283,8 @@ export const Inventory: React.FC = () => {
       } catch (err) {
         console.error("problem:", err);
       }
+    } else {
+      setDeleteItem(false)
     }
   };
 
@@ -462,7 +473,7 @@ export const Inventory: React.FC = () => {
                   <input
                     type="text"
                     key={i}
-                    placeholder={`${item[labelToFieldMapping[label]]}`}
+                    placeholder={`${item[labelToFieldMapping[label]] || ''}`}
                     className="text-center border-2 p-1 overflow-hidden overflow-x-scroll border-gray-600"
                     onChange={(e) =>
                       collectEditedInventory(
@@ -481,7 +492,7 @@ export const Inventory: React.FC = () => {
                   <input
                     type="text"
                     key={i}
-                    placeholder={`${item[labelToFieldMapping[label]]}`}
+                    placeholder={`${item[labelToFieldMapping[label]] || ''}`}
                     className="text-center border-2 p-1 overflow-hidden overflow-x-scroll border-gray-600"
                     onChange={(e) =>
                       collectEditedInventory(

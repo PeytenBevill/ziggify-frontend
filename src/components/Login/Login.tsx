@@ -22,8 +22,8 @@ const Login: React.FC = () => {
           ) {
             loginHandler({
               companyName: data[0].companyName,
-              companyAccount: data[0].companyAccount
-            })
+              companyAccount: data[0].companyAccount,
+            });
             navigate("/dashboard");
           } else {
             window.alert("Invalid userID, password, or company account ID");
@@ -66,7 +66,12 @@ const Login: React.FC = () => {
         >
           Login
         </button>
-        <p className="mt-2 cursor-pointer" onClick={() => navigate('/new-user')}>New User? Create an account</p>
+        <p
+          className="mt-2 cursor-pointer"
+          onClick={() => navigate("/new-user")}
+        >
+          New User? Create an account
+        </p>
       </div>
     </div>
   );
