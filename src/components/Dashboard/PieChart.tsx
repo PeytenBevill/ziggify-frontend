@@ -1,6 +1,5 @@
 import React, { PureComponent, ReactNode } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { Tooltip } from "chart.js";
 
 interface DataItem {
   name: string;
@@ -78,6 +77,7 @@ class PieChartExample extends PureComponent<PieChartExampleProps> {
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
+                  onClick={() => console.log(entry)}
                 />
               </>
             ))}

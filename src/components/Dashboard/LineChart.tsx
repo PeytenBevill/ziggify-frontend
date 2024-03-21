@@ -7,7 +7,7 @@ import { numData, label } from "./dataOne";
 import { ChartsYAxis } from "@mui/x-charts";
 
 export default function SwitchSeriesType() {
-  const [type, setType] = React.useState<"line" | "bar">("line");
+  const [type] = React.useState<"line" | "bar">("line");
 
   return (
     <Box

@@ -99,7 +99,7 @@ const dataset = [
 
 const valueFormatter = (value: number) => `${value}mm`;
 
-export default function HorizontalBars() {
+const HorizontalBars: React.FC = () => {
   return (
     <BarChart
       dataset={dataset}
@@ -110,3 +110,5 @@ export default function HorizontalBars() {
     />
   );
 }
+
+export default HorizontalBars;
